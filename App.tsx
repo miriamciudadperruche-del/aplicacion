@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout, UserCheck, History, Settings, LayoutDashboard, Search, Bell } from 'lucide-react';
+import { Layout, UserCheck, History, Settings, LayoutDashboard, Search, Bell, LogOut } from 'lucide-react';
 import { Staff, WorkLog, StaffStatus, LogType } from './types';
 import Dashboard from './components/Dashboard';
 import ClockStation from './components/ClockStation';
 import HistoryLogs from './components/HistoryLogs';
 import AdminPanel from './components/AdminPanel';
 import DynamicIsland from './components/DynamicIsland';
+import AdminAuthGate from './components/AdminAuthGate';
 
 const INITIAL_STAFF: Staff[] = [
   { id: '1', name: 'Ana García', position: 'Desarrolladora Senior', status: StaffStatus.ACTIVE, currentWorkStatus: 'OUT' },
@@ -17,6 +18,7 @@ const INITIAL_STAFF: Staff[] = [
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'clock' | 'history' | 'admin'>('dashboard');
   const [lastLog, setLastLog] = useState<WorkLog | null>(null);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [staff, setStaff] = useState<Staff[]>(() => {
     const saved = localStorage.getItem('staff_data');
     return saved ? JSON.parse(saved) : INITIAL_STAFF;
@@ -66,7 +68,23 @@ const App: React.FC = () => {
       case 'history':
         return <HistoryLogs logs={logs} />;
       case 'admin':
-        return <AdminPanel staff={staff} setStaff={setStaff} logs={logs} setLogs={setLogs} />;
+        if (!isAdminAuthenticated) {
+          return <AdminAuthGate onSuccess={() => setIsAdminAuthenticated(true)} />;
+        }
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-end mb-4">
+              <button 
+                onClick={() => setIsAdminAuthenticated(false)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all"
+              >
+                <LogOut size={14} />
+                CERRAR SESIÓN ADMIN
+              </button>
+            </div>
+            <AdminPanel staff={staff} setStaff={setStaff} logs={logs} setLogs={setLogs} />
+          </div>
+        );
       default:
         return <Dashboard staff={staff} logs={logs} />;
     }
@@ -121,7 +139,7 @@ const App: React.FC = () => {
             <div className="w-8 h-8 rounded-full bg-indigo-400 flex items-center justify-center font-bold">A</div>
             <div>
               <p className="text-sm font-medium">Administrador</p>
-              <p className="text-xs text-indigo-300">Control Pro</p>
+              <p className="text-xs text-indigo-300">{isAdminAuthenticated ? 'Sessión Activa' : 'Área Protegida'}</p>
             </div>
           </div>
         </div>
