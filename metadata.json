@@ -1,0 +1,8 @@
+{
+  "name": "StaffSync - Control de Asistencia",
+  "description": "Una aplicación profesional para el registro de entrada y salida de personal con análisis de datos asistido por IA, gestión de empleados y visualización de métricas en tiempo real.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
